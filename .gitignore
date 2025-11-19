@@ -2,3 +2,11 @@
 .venv/
 # Python bytecode
 .idea/
+# Idea
+*.DS_Store
+
+# Csv files
+/data
+*.csv
+
+

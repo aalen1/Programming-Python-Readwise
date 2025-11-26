@@ -10,7 +10,7 @@ class RatingWindow(ctk.CTkToplevel):
         self.geometry("900x800")
 
         # Columns of interest
-        cols = ["title", "author(s)", "ratings_count", "average_rating"]
+        cols = ["average_rating", "ratings_count","title", "author(s)"]
 
         # Filter the columns of interest
         view_df = books_df[cols].copy()
@@ -34,12 +34,11 @@ class RatingWindow(ctk.CTkToplevel):
             pagesize=25,
             searchable=True,
             bootstyle="info",
-            stripecolor=("#f8f9fa", "#e9ecef"),
+            stripecolor=("#F8F9Fa", "#E9ECEF"),
         )
-
         self.table.pack(fill="both", expand=True)
 
-        # Autofit columns enabled
+        # Autofit columns
         self.table.autofit_columns()
 
         # Close button at the bottom
@@ -48,7 +47,7 @@ class RatingWindow(ctk.CTkToplevel):
 
         close_btn = ctk.CTkButton(
             master=button_frame,
-            text="Close",
+            text="Back",
             width=100,
             command=self.destroy,
         )

@@ -1,10 +1,11 @@
 import tkinter as tk
 import customtkinter as ctk
+from tkinter import messagebox
 import random
-from tkinter import ttk
 from Chat import ChatApp
 from Rating import RatingWindow
 from Info import InfoWindow
+from Recommendation import RecommendationWindow
 import pandas as pd
 
 # Main Page with Sidebar + Buttons
@@ -62,7 +63,7 @@ class MainPage(tk.Tk):
             border_width = 3,
             border_color = "#8e8e8e",
             height = height_search_bar,
-            placeholder_text = "Search by title, author, or ISBN...",
+            placeholder_text = "Get your next book recommendation. Please enter a book title, author, or ISBN...",
             placeholder_text_color = "#8e8e8e",
         )
         # Padding for the search bar
@@ -71,7 +72,7 @@ class MainPage(tk.Tk):
         # Search button
         self.search_button = ctk.CTkButton(
             master = self.search_frame,
-            text = "Search",
+            text = "Discover",
             width = 30,
             height = height_search_bar,
             command = self.on_button_search_clicked
@@ -87,7 +88,7 @@ class MainPage(tk.Tk):
         self.button_canvas.pack(expand=True, pady=10)
 
         # 3 main section buttons
-        button_names = ["Chat Assistant","Top 500","Info"]
+        button_names = ["Chat Assistant","Top 500 by Avg Rating","Info"]
 
         # Another grid frame (to center everything)
         buttons_frame = ctk.CTkFrame(self.button_canvas, fg_color = "#CBDED3")
@@ -103,12 +104,13 @@ class MainPage(tk.Tk):
         # Build the 3 buttons in one row
         for i, name in enumerate(button_names):
 
+            # Nested if else for assigning the correct helper function to the button
             if name == "Chat Assistant":
-                cmd = self.open_chat
-            elif name == "Top 500":
-                cmd = self.open_rating
+                 helper_func= self.open_chat
+            elif name == "Top 500 by Avg Rating":
+                 helper_func= self.open_rating
             elif name == "Info":
-                cmd = self.open_info
+                 helper_func= self.open_info
 
             btn = ctk.CTkButton(
                 master=buttons_frame,
@@ -120,7 +122,7 @@ class MainPage(tk.Tk):
                 fg_color="#1F1F33",
                 hover_color="#2A2A44",
                 text_color="white",
-                command=cmd
+                command=helper_func
             )
             btn.grid(row=0, column=i, padx=25, pady=20)
 
@@ -143,42 +145,82 @@ class MainPage(tk.Tk):
         )
         close_button.pack(side="bottom",pady=10)
 
-    # ------------- End of Main Page
-    # ------------- Event Handlers
+    # End of the Main Page
+    # Helper function aka handlers
     def close_window(self):
+        """
+        Close main window helper function
+        :return: None
+        """
         self.destroy()
 
-    # Event to define when the user clicks the search button
+    # Event to define when the user clicks the search button or presses enter in the search box
     def on_button_search_clicked(self):
+        """
+        Helper function when the search box is triggered, it searches the input in the dataframe and
+        :return: None
+        """
+        # Get the value from the search box and process it
         query = self.search_entry_bar.get().strip()
+        # If the entry is null
         if not query:
+            messagebox.showwarning("Empty search", "Please type a book title, author or ISBN.")
             return
+        # Declare a variable data for easy manage
+        data = self.books_df
+        # Check if the title, author or isbn exists
+        search_mask = (
+                data["title"].str.contains(query, case=False, na=False) |
+                data["author(s)"].str.contains(query, case=False, na=False) |
+                data["isbn13"].astype(str).str.contains(query, na=False)
+        )
+
+        # If the search mask applied to the data is 0, then no match is found
+        if data[search_mask].shape[0] == 0:
+            messagebox.showwarning(
+                "No matched results",
+                "No books found matching your search.\n\n"
+                "Please try another title, author, or ISBN."
+            )
+            return
+
+        # Open recommendation window with the information from the search box
+        RecommendationWindow(self, query, self.books_df)
 
         print(f"Search requested for {query}")
 
     # Switch to Chat Window
     def open_chat(self):
-        # Hide the main page content
-        self.main_frame.pack_forget()
-        self.sidebar.pack_forget()
+        """
+        Helper Function to open the chat window
+        :return: None
+        """
+        # New Toplevel window
+        chat_window = tk.Toplevel(self)
+        chat_window.title("Readwise Chat")
+        chat_window.geometry("1000x650")
+        chat_window.configure(bg="#3B6255")
 
-        # Create a new frame to hold the chat page within the same window
-        self.chat_frame = tk.Frame(self, bg="#1e1e2e")
-        self.chat_frame.pack(fill="both", expand=True)
-
-        # Initialize the ChatApp interface inside this new frame
-        chat_app = ChatApp()
-        chat_app.master = self.chat_frame   # Reassign the container
+        # ChatApp frame inside this new Toplevel window
+        chat_app = ChatApp(master=chat_window)
         chat_app.pack(fill="both", expand=True)
 
     def open_rating(self):
+        """
+        Helper Function to open the top 500 window
+        :return: None
+        """
         RatingWindow(self, self.books_df)
 
     def open_info(self):
+        """
+        Helper function to open the Info Window
+        :return:
+        """
         InfoWindow(self)
 
 
-# Run Main Page
+# Main Execution
 if __name__ == "__main__":
     app = MainPage()
     app.mainloop()

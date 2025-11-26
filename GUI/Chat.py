@@ -1,23 +1,15 @@
-# ==========================================
-# ChatGPT-like Book Recommender Frontend
-# Author: Your Name
-# Date: YYYY-MM-DD
-# ==========================================
-
 import tkinter as tk
 from tkinter import scrolledtext, messagebox, ttk
 
-# -----------------------------
-# Main Chat Application Class
-# -----------------------------
+# Main Chat Application
 class ChatApp(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master,bg="#1e1e2e")
 
         # Window setup
-        self.master.title("Book Recommender Chat")
+        self.master.title("Readwise chat Chat")
         self.master.geometry("1000x650")
-        self.master.configure(bg="#1e1e2e")
+        self.master.configure(bg="#3B6255")
 
         # Fonts & colors
         self.user_color = "#93c5fd"    # light blue

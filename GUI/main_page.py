@@ -3,6 +3,9 @@ import customtkinter as ctk
 import random
 from tkinter import ttk
 from Chat import ChatApp
+from Rating import RatingWindow
+from Info import InfoWindow
+import pandas as pd
 
 # Main Page with Sidebar + Buttons
 class MainPage(tk.Tk):
@@ -15,6 +18,8 @@ class MainPage(tk.Tk):
         self.geometry("1200x600")
         # General background color
         self.configure(bg="#3B6255")
+        # Data of the books
+        self.books_df = pd.read_csv("./data/final_df.csv")
 
         # Sidebar Customization
         self.sidebar = tk.Frame(self, bg="#D2C49E", width=120)
@@ -82,7 +87,7 @@ class MainPage(tk.Tk):
         self.button_canvas.pack(expand=True, pady=10)
 
         # 3 main section buttons
-        button_names = ["Chat Assistant","Rating","Info"]
+        button_names = ["Chat Assistant","Top 500","Info"]
 
         # Another grid frame (to center everything)
         buttons_frame = ctk.CTkFrame(self.button_canvas, fg_color = "#CBDED3")
@@ -100,10 +105,10 @@ class MainPage(tk.Tk):
 
             if name == "Chat Assistant":
                 cmd = self.open_chat
-            elif name == "Rating":
-                cmd = self.placeholder
+            elif name == "Top 500":
+                cmd = self.open_rating
             elif name == "Info":
-                cmd = self.placeholder
+                cmd = self.open_info
 
             btn = ctk.CTkButton(
                 master=buttons_frame,
@@ -165,6 +170,12 @@ class MainPage(tk.Tk):
         chat_app = ChatApp()
         chat_app.master = self.chat_frame   # Reassign the container
         chat_app.pack(fill="both", expand=True)
+
+    def open_rating(self):
+        RatingWindow(self, self.books_df)
+
+    def open_info(self):
+        InfoWindow(self)
 
 
 # Run Main Page

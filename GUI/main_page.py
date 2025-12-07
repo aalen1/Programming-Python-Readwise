@@ -6,13 +6,16 @@ from Chat import ChatApp
 from Rating import RatingWindow
 from Info import InfoWindow
 from Recommendation import RecommendationWindow
+from AccountWindow import AccountWindow
 import pandas as pd
 
 # Main Page with Sidebar + Buttons
 class MainPage(tk.Tk):
-    def __init__(self):
+    def __init__(self, current_user=None):
         # Custom Tkinter Theme
         super().__init__()
+        # Current user logged in
+        self.current_user = current_user
         # ----------- Main window setup
         # Window title and size
         self.title("Readwise your Personal Book Recommendation Assistant")
@@ -20,7 +23,7 @@ class MainPage(tk.Tk):
         # General background color
         self.configure(bg="#3B6255")
         # Data of the books
-        self.books_df = pd.read_csv("./data/final_df.csv")
+        self.books_df = pd.read_csv("../data/final_df.csv")
 
         # Sidebar Customization
         self.sidebar = tk.Frame(self, bg="#D2C49E", width=120)
@@ -63,7 +66,7 @@ class MainPage(tk.Tk):
             border_width = 3,
             border_color = "#8e8e8e",
             height = height_search_bar,
-            placeholder_text = "Get your next book recommendation. Please enter a book title, author, or ISBN...",
+            placeholder_text = "Search for a book. Please enter a book title, author, or ISBN...",
             placeholder_text_color = "#8e8e8e",
         )
         # Padding for the search bar
@@ -88,7 +91,7 @@ class MainPage(tk.Tk):
         self.button_canvas.pack(expand=True, pady=10)
 
         # 3 main section buttons
-        button_names = ["Chat Assistant","Top 500 by Avg Rating","Info"]
+        button_names = ["Chat Assistant","Top Books 500 by Avg Rating","Account Info"]
 
         # Another grid frame (to center everything)
         buttons_frame = ctk.CTkFrame(self.button_canvas, fg_color = "#CBDED3")
@@ -107,10 +110,10 @@ class MainPage(tk.Tk):
             # Nested if else for assigning the correct helper function to the button
             if name == "Chat Assistant":
                  helper_func= self.open_chat
-            elif name == "Top 500 by Avg Rating":
+            elif name == "Top Books 500 by Avg Rating":
                  helper_func= self.open_rating
-            elif name == "Info":
-                 helper_func= self.open_info
+            elif name == "Account Info":
+                 helper_func= self.open_account
 
             btn = ctk.CTkButton(
                 master=buttons_frame,
@@ -132,6 +135,19 @@ class MainPage(tk.Tk):
         # ------------ (Close button)
         self.close_canvas = ctk.CTkFrame(self.main_frame, corner_radius=20, fg_color="transparent")
         self.close_canvas.pack(expand=True, pady=10)
+
+        # Readwise Info
+        app_info_button = ctk.CTkButton(
+            master = self.close_canvas,
+            text = "Readwise Info",
+            width = 120,
+            height = 35,
+            corner_radius = 8,
+            fg_color="#3b3b40",
+            hover_color="#4b4b52",
+            command=self.open_info
+        )
+        app_info_button.pack(pady=10)
 
         close_button = ctk.CTkButton(
             master = self.close_canvas,
@@ -212,16 +228,17 @@ class MainPage(tk.Tk):
         """
         RatingWindow(self, self.books_df)
 
+    def open_account(self):
+        if not self.current_user:
+            messagebox.showwarning("No user logged in", "Please login to access your account information.")
+            return
+
+        AccountWindow(self, self.current_user)
+
     def open_info(self):
         """
         Helper function to open the Info Window
         :return:
         """
         InfoWindow(self)
-
-
-# Main Execution
-if __name__ == "__main__":
-    app = MainPage()
-    app.mainloop()
 

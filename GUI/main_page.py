@@ -8,6 +8,7 @@ from Info import InfoWindow
 from BooksRead import BooksRead
 from AccountWindow import AccountWindow
 import pandas as pd
+from paths import books_df_dir, clustered_df_dir
 from palette import COLORS, FONTS
 
 
@@ -28,9 +29,9 @@ class MainPage(ctk.CTkFrame):
         self.master.configure(fg_color=COLORS["bg_root"])
         self.configure(fg_color=COLORS["bg_root"])
         # Data of the books
-        self.books_df = pd.read_csv("../data/final_df.csv")
+        self.books_df = pd.read_csv(books_df_dir)
         # Clustered books
-        self.clustered_df = pd.read_csv("../data/clustered_df.csv")
+        self.clustered_df = pd.read_csv(clustered_df_dir)
 
         # Normalize isbn13 column
         self.books_df["isbn13"] = self.books_df["isbn13"].astype(str)

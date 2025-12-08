@@ -9,7 +9,7 @@ class RegistrationWindow(ctk.CTkToplevel):
         super().__init__(master)
 
         self.title("Create Account")
-        self.geometry("500x450")
+        self.geometry("800x650")
         self.grab_set()
         self.configure(fg_color=COLORS["bg_root"])
 

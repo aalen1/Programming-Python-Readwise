@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import ast
 from tkinter import messagebox
-from GUI.users_handler_functions import update_books_read
+from users_handler_functions import update_books_read
 from palette import COLORS
 
 

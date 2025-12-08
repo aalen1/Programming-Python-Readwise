@@ -1,8 +1,9 @@
 import os
 import pandas as pd
 import json
+from paths import user_db_dir
 
-USER_DB = "../data/users.csv"
+USER_DB = user_db_dir
 
 COLUMNS = [
     "username",

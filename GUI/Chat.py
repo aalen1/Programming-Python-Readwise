@@ -2,11 +2,12 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import messagebox
 from recommender_funcs import recommend
+from palette import COLORS
 
 # Main Chat Application
 class ChatApp(ctk.CTkFrame):
     def __init__(self, master=None, books_df=None, clustered_df=None, current_user=None):
-        super().__init__(master, fg_color="#1e1e2e")
+        super().__init__(master, fg_color=COLORS["bg_main"])
 
         # References
         self.books_df = books_df
@@ -15,9 +16,9 @@ class ChatApp(ctk.CTkFrame):
 
         # Fonts and colors to use during the chat
         self.user_color = "#040E18"
-        self.bot_color = "#000000"
-        self.bg_color = "#E2DFDA"
-        self.text_color = "#FFFFFF"
+        self.bot_color = COLORS["text_main"]
+        self.bg_color = COLORS["bg_main"]
+        self.text_color = COLORS["text_main"]
 
         # From the toplevel configure the window
         toplevel = self.winfo_toplevel()
@@ -26,10 +27,10 @@ class ChatApp(ctk.CTkFrame):
         # Window size
         toplevel.geometry("1000x650")
         # Window background
-        toplevel.configure(bg="#CBDED3")
+        toplevel.configure(fg_color=COLORS["bg_main"])
 
         # Sidebar Frame
-        self.sidebar = ctk.CTkFrame(self, fg_color="#8DA49A", width=150)
+        self.sidebar = ctk.CTkFrame(self, fg_color=COLORS["bg_sidebar"], width=150)
         self.sidebar.pack(side="left", fill="y")
         # Prevent sidebar from shrinking
         self.sidebar.pack_propagate(False)
@@ -39,7 +40,7 @@ class ChatApp(ctk.CTkFrame):
             self.sidebar,
             text="Readwise Chat",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#18181A"
+            text_color=COLORS["text_main"],
         )
         sidebar_label.pack(pady=15)
 
@@ -50,9 +51,9 @@ class ChatApp(ctk.CTkFrame):
         # Label to put the title of the chat
         title_label = ctk.CTkLabel(
             self.main_container,
-            text= "Chat and get a book recommendation",
+            text="Chat and get a book recommendation",
             font=ctk.CTkFont(size=18, weight="bold"),
-            text_color="#18181A"
+            text_color=COLORS["text_main"],
         )
         title_label.pack(pady=10)
 
@@ -60,10 +61,10 @@ class ChatApp(ctk.CTkFrame):
         self.chat_box = ctk.CTkTextbox(
             self.main_container,
             font=ctk.CTkFont(size=13),
-            fg_color="#D2C49E",
+            fg_color=COLORS["panel"],
             text_color=self.bot_color,
             wrap="word",
-            border_width=0
+            border_width=0,
         )
         self.chat_box.pack(padx=15, pady=10, fill="both", expand=True)
         # Initial message from the bot
@@ -75,7 +76,7 @@ class ChatApp(ctk.CTkFrame):
             " - An ISBN-13 (only digits)\n"
             " - A book title\n"
             " - An author's name\n\n"
-            "I will try to find a book that matches your request.\n\n"
+            "I will try to find a book that matches your request.\n\n",
         )
         self.chat_box.tag_config("user", foreground=self.user_color)
         self.chat_box.tag_config("bot", foreground=self.bot_color)
@@ -89,10 +90,10 @@ class ChatApp(ctk.CTkFrame):
         self.user_input = ctk.CTkEntry(
             input_frame,
             font=ctk.CTkFont(size=13),
-            fg_color="#3a3a4a",
-            text_color=self.text_color,
+            fg_color=COLORS["entry_bg"],
+            text_color="#F9FAFB",
             border_width=0,
-            placeholder_text="Type the title, author or ISBN here..."
+            placeholder_text="Type the title, author or ISBN here...",
         )
         self.user_input.pack(side="left", fill="x", expand=True, padx=(0, 10), pady=5)
         self.user_input.bind("<Return>", self.on_enter)
@@ -102,7 +103,10 @@ class ChatApp(ctk.CTkFrame):
             input_frame,
             text="Send",
             width=80,
-            command=self.on_send
+            fg_color=COLORS["primary_btn"],
+            hover_color=COLORS["primary_hover"],
+            text_color="white",
+            command=self.on_send,
         )
         send_button.pack(side="right")
 
@@ -115,6 +119,9 @@ class ChatApp(ctk.CTkFrame):
             master=button_frame,
             text="Back",
             width=100,
+            fg_color=COLORS["primary_btn"],
+            hover_color=COLORS["primary_hover"],
+            text_color="white",
             command=self.close_window,
         )
         close_btn.pack()
@@ -178,7 +185,7 @@ class ChatApp(ctk.CTkFrame):
 
         # Validate the input from the user:
         if not any(ch.isalnum() for ch in user_msg):
-            return(
+            return (
                 "I couldn't understand your request.\n\n"
                 "Please enter ONE of the following:"
                 " - An ISBN-13 (only digits)\n"
@@ -193,15 +200,17 @@ class ChatApp(ctk.CTkFrame):
         # Check the length of the candidate
         if len(isbn_candidate) == 13:
             # Check that this isbn exists in BOTH the book df and the clustered df
-            if (books["isbn13"] == isbn_candidate).any() and (clustered["isbn13"] == isbn_candidate).any():
+            if (books["isbn13"] == isbn_candidate).any() and (
+                clustered["isbn13"] == isbn_candidate
+            ).any():
                 isbn = isbn_candidate
 
         # If no ISBN is found, we search for book titles and authors
         if isbn is None:
             # Mask for the search of title or author
             mask = (
-                    books["title"].str.contains(user_msg, case=False, na=False) |
-                    books["author(s)"].str.contains(user_msg, case=False, na=False)
+                books["title"].str.contains(user_msg, case=False, na=False)
+                | books["author(s)"].str.contains(user_msg, case=False, na=False)
             )
             # Get the books that match the mask
             matches = books[mask]
@@ -223,7 +232,7 @@ class ChatApp(ctk.CTkFrame):
                     break
 
         # Get the recommendations
-        rec_idx = recommend(isbn,clustered, n=3)
+        rec_idx = recommend(isbn, clustered, n=3)
 
         # If the recommendations are empty
         if not rec_idx:
@@ -258,4 +267,3 @@ class ChatApp(ctk.CTkFrame):
         )
 
         return "\n".join(msg) + helper_txt
-

@@ -86,7 +86,7 @@ class MainPage(ctk.CTkFrame):
         # Search button
         self.search_button = ctk.CTkButton(
             master=self.search_frame,
-            text="Discover",
+            text="Search",
             width=30,
             height=height_search_bar,
             fg_color=COLORS["primary_btn"],

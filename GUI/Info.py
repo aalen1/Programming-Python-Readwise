@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from palette import COLORS
 
 class InfoWindow(ctk.CTkToplevel):
     def __init__(self, master):
@@ -7,13 +8,14 @@ class InfoWindow(ctk.CTkToplevel):
         # Window Definition
         self.title("About the Team")
         self.geometry("500x400")
-        self.configure(bg="#3B6255")
+        self.configure(fg_color=COLORS["bg_root"])
 
         # Label with the title of the Window
         title = ctk.CTkLabel(
             self,
             text="Readwise Information",
-            font=ctk.CTkFont(size=22, weight="bold")
+            font=ctk.CTkFont(size=22, weight="bold"),
+            text_color="white"
         )
         title.pack(pady=(20, 10))
 
@@ -27,17 +29,30 @@ class InfoWindow(ctk.CTkToplevel):
             "\n"
             "ver: 1.0.0"
         )
+
         # Textbox information
         textbox = ctk.CTkTextbox(
             self,
             width=440,
             height=240,
-            wrap="word"
+            wrap="word",
+            fg_color=COLORS["panel"],
+            text_color=COLORS["text_main"],
+            font=ctk.CTkFont(size=13)
         )
         textbox.pack(padx=20, pady=10)
+
         # Insert the text
         textbox.insert("1.0", info_text)
         textbox.configure(state="disabled")
 
-        close_btn = ctk.CTkButton(self, text="Back", width=100, command=self.destroy)
+        close_btn = ctk.CTkButton(
+            self,
+            text="Back",
+            width=100,
+            fg_color=COLORS["primary_btn"],
+            hover_color=COLORS["primary_hover"],
+            text_color="white",
+            command=self.destroy
+        )
         close_btn.pack(pady=15)

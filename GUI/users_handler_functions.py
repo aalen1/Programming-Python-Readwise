@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import json
 
 USER_DB = "../data/users.csv"
 
@@ -8,7 +9,7 @@ COLUMNS = [
     "password",
     "first_name",
     "last_name",
-    "birth_date"
+    "birth_date",
     "books_read"
 ]
 
@@ -48,7 +49,13 @@ def get_user(username: str):
         return None
 
     # Take the first row (there should only be one)
-    return match.iloc[0].to_dict()
+    user = match.iloc[0].to_dict()
+
+    # Parse books_read JSON list into a set of tuples
+    books_str = user.get("books_read", "")
+    user["books_read"] = parse_books_read(books_str)
+
+    return user
 
 
 def add_user(user_data: dict) -> None:
@@ -73,3 +80,60 @@ def add_user(user_data: dict) -> None:
 
     # Save the dataframe
     save_users(df)
+
+def serialize_books_read(books_read:set):
+    """
+    Convert a set or list of tuples into a JSON list string for storage
+    :param books_read:
+    :return: a json dump
+    """
+
+    if not books_read:
+        return "[]"
+
+    # Normalize the list of books
+    books = []
+    for item in books_read:
+        if isinstance(item, tuple):
+            title, isbn = item
+            books.append([str(title), str(isbn)])
+
+    return json.dumps(books)
+
+def parse_books_read(books_str:str):
+    """
+    Parse the JSON string into a set of tuples
+    :param books_str:
+    :return: a set of tuples
+    """
+
+    if not isinstance(books_str,str) or not books_str.strip():
+        return set()
+
+    # Try using the json module to load the book str
+    try:
+        data = json.loads(books_str)
+    except json.JSONDecodeError:
+        return set()
+
+    # Add each book to the set
+    res = set()
+    for book in data:
+        title, isbn = book
+        res.add((str(title), str(isbn)))
+
+    return res
+
+def update_books_read(username, books_read):
+    """
+    Update the books read for the user in the database
+    :param username: username to be updated
+    :param books_read: set of books read
+    """
+
+    df = load_users()
+
+    if username in df["username"].values:
+        books_str = serialize_books_read(books_read)
+        df.loc[df['username'] == username, 'books_read'] = books_str
+        save_users(df)

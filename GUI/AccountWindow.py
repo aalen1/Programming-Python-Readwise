@@ -2,6 +2,7 @@ import customtkinter as ctk
 import ast
 from tkinter import messagebox
 from GUI.users_handler_functions import update_books_read
+from palette import COLORS
 
 
 class AccountWindow(ctk.CTkToplevel):
@@ -14,13 +15,14 @@ class AccountWindow(ctk.CTkToplevel):
         self.title("Account Information")
         self.geometry("800x450")
         self.grab_set()
-        self.configure(fg_color = "#1E1E2E")
+        self.configure(fg_color=COLORS["bg_root"])
 
         # Title label
         title = ctk.CTkLabel(
             self,
             text="Account Information",
-            font=ctk.CTkFont(size=26, weight="bold")
+            font=ctk.CTkFont(size=26, weight="bold"),
+            text_color="#F9FAFB"
         )
         title.pack(pady=(20, 10))
 
@@ -30,8 +32,8 @@ class AccountWindow(ctk.CTkToplevel):
         def add_row(label, value):
             row = ctk.CTkFrame(info_frame, fg_color="transparent")
             row.pack(fill="x", pady=3)
-            ctk.CTkLabel(row, text=f"{label}:", width=100, anchor="w").pack(side="left")
-            ctk.CTkLabel(row, text=value, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=f"{label}:", width=100, anchor="w", text_color="#F9FAFB").pack(side="left")
+            ctk.CTkLabel(row, text=value, anchor="w", text_color="#F9FAFB").pack(side="left")
 
         add_row("Username", user_data.get("username", ""))
         add_row("First name", user_data.get("first_name", ""))
@@ -41,16 +43,16 @@ class AccountWindow(ctk.CTkToplevel):
         # Special section for the books read
         books_read_label = ctk.CTkLabel(
             self,
-            text = "Books read:",
+            text="Books read:",
             font=ctk.CTkFont(size=16, weight="bold"),
-            text_color="#e5e7eb"
+            text_color="#F9FAFB"
         )
         books_read_label.pack(anchor="w", padx=40, pady=(20, 5))
 
         # Create a scrollable frame
         self.books_frame = ctk.CTkScrollableFrame(
             self,
-            fg_color="#111827",
+            fg_color=COLORS["primary_btn"],
             width=620,
             height=180,
             corner_radius=8
@@ -64,6 +66,9 @@ class AccountWindow(ctk.CTkToplevel):
             self,
             text="Close",
             width=100,
+            fg_color=COLORS["primary_btn"],
+            hover_color=COLORS["primary_hover"],
+            text_color="white",
             command=self.destroy
         )
         close_btn.pack(pady=15)
@@ -92,7 +97,7 @@ class AccountWindow(ctk.CTkToplevel):
                 self.books_frame,
                 text="No books marked as read yet.",
                 font=ctk.CTkFont(size=13),
-                text_color="#9ca3af"
+                text_color="#E5E7EB"
             )
             empty_label.pack(pady=10, padx=10, anchor="w")
             return
@@ -106,35 +111,35 @@ class AccountWindow(ctk.CTkToplevel):
             header,
             text="Title",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#e5e7eb"
+            text_color="#F9FAFB"
         )
         h_title.pack(side="left", padx=(8, 0))
 
         # A frame for the right side of the header
         right_header = ctk.CTkFrame(header, fg_color="transparent")
-        right_header.pack(side="right",padx=(8,8))
+        right_header.pack(side="right", padx=(8, 8))
 
         # ISBN header
         h_isbn = ctk.CTkLabel(
             right_header,
             text="ISBN",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#e5e7eb"
+            text_color="#F9FAFB"
         )
         h_isbn.pack(side="left", padx=(10, 120))
 
         # Spacer for the button
         h_action = ctk.CTkLabel(
             right_header,
-            text = "",
+            text="",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#E5E7EB"
+            text_color="#F9FAFB"
         )
         h_action.pack(side="left", padx=(0, 0))
 
         # Sort by title (case insensitive)
         for title, isbn in sorted(list(books_read), key=lambda x: x[0].lower()):
-            row = ctk.CTkFrame(self.books_frame, fg_color="#1f2937", corner_radius=6)
+            row = ctk.CTkFrame(self.books_frame, fg_color=COLORS["secondary_btn"], corner_radius=6)
             row.pack(fill="x", pady=3, padx=4)
 
             # Title label
@@ -142,39 +147,41 @@ class AccountWindow(ctk.CTkToplevel):
                 row,
                 text=title,
                 font=ctk.CTkFont(size=13),
-                text_color="#e5e7eb",
+                text_color="#F9FAFB",
                 anchor="w"
             )
             title_label.pack(side="left", padx=(8, 4), pady=4)
 
             # Right Frame for isbn and remove button
             right_frame = ctk.CTkFrame(row, fg_color="transparent")
-            right_frame.pack(side="right", padx=(8,8), pady=4)
+            right_frame.pack(side="right", padx=(8, 8), pady=4)
 
             # ISBN Label
             isbn_label = ctk.CTkLabel(
                 right_frame,
                 text=isbn,
                 font=ctk.CTkFont(size=12),
-                text_color="#9ca3af",
+                text_color="#E5E7EB",
                 anchor="e"
             )
-            isbn_label.pack(side="left", padx=(10,16))
+            isbn_label.pack(side="left", padx=(10, 16))
 
             # Remove button
             remove_button = ctk.CTkButton(
                 right_frame,
-                text = "Remove",
-                width = 80,
-                height = 26,
-                font = ctk.CTkFont(size=12),
-                fg_color="#7F1D1D",
+                text="Remove",
+                width=80,
+                height=26,
+                font=ctk.CTkFont(size=12),
+                fg_color=COLORS["danger"],
+                hover_color=COLORS["danger_hover"],
+                text_color="white",
                 # Lambda function to remove the book from the user's books read set
-                command = lambda t=title, i=isbn: self.remove_book(t,i)
+                command=lambda t=title, i=isbn: self.remove_book(t, i)
             )
-            remove_button.pack(side="left", padx=(0,0))
+            remove_button.pack(side="left", padx=(0, 0))
 
-    def remove_book(self,title,isbn):
+    def remove_book(self, title, isbn):
         """
         Method to remove a book from the user's books read set
         :param title: title of the book
@@ -186,7 +193,7 @@ class AccountWindow(ctk.CTkToplevel):
         if not isinstance(books_read, set):
             books_read = set()
 
-        book = (title,isbn)
+        book = (title, isbn)
         if book in books_read:
             books_read.remove(book)
 
@@ -202,6 +209,3 @@ class AccountWindow(ctk.CTkToplevel):
 
         else:
             messagebox.showinfo("Remove Update", "This book is no longer in your list")
-
-
-

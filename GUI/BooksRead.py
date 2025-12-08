@@ -9,7 +9,7 @@ class BooksRead(ctk.CTkToplevel):
 
         # Create the recommendation window
         self.title("Book Search")
-        self.geometry("750x500")
+        self.geometry("1000x1200")
         # Variables to store the query and the books_df
         self.query = query
         self.books_df = books_df
@@ -24,7 +24,7 @@ class BooksRead(ctk.CTkToplevel):
         # Title of frame containing the searched book
         title_label = ctk.CTkLabel(
             self,
-            text=f"Search for: \"{query}\"",
+            text=f"Search for: \"{query.title()}\"",
             font=ctk.CTkFont(size=20, weight="bold")
         )
         title_label.pack(pady=(20, 10))
@@ -52,22 +52,22 @@ class BooksRead(ctk.CTkToplevel):
         self.top_n_menu.set("5")
         self.top_n_menu.pack(side="left")
 
-        # Container with thesearch_results
+        # Container with the search results
         self.results_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.results_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         # Save & Back Frame
-        buttons_frame = ctk.CTkFrame(self,fg_color = "transparent")
-        buttons_frame.pack(fill="both", expand = True, padx = 20, pady = 10)
+        buttons_frame = ctk.CTkFrame(self, fg_color="transparent")
+        buttons_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         # Save button, when the users clicks it, the read books are saved in the database
         save_button = ctk.CTkButton(
             buttons_frame,
-            text = "Save as read",
-            width = 120,
-            command = self.save_read_books
+            text="Save checked books",
+            width=120,
+            command=self.save_read_books
         )
-        save_button.pack(side = "left", padx = 10)
+        save_button.pack(side="left", padx=10)
 
         # Another close button for this window
         close_btn = ctk.CTkButton(
@@ -111,7 +111,7 @@ class BooksRead(ctk.CTkToplevel):
             title_text = row.get("title", "")
             title = ctk.CTkLabel(
                 book_frame,
-                text=row.get("title", ""),
+                text=title_text.title(),
                 font=ctk.CTkFont(size=16, weight="bold"),
                 text_color="#18181A"
             )
@@ -120,7 +120,7 @@ class BooksRead(ctk.CTkToplevel):
             # Label for the authors(s), if not found: ""
             authors = ctk.CTkLabel(
                 book_frame,
-                text=f'by {row.get("author(s)", "")}',
+                text=f'by {row.get("author(s)", "").title()}',
                 font=ctk.CTkFont(size=13),
                 text_color="#18181A"
             )
@@ -155,7 +155,8 @@ class BooksRead(ctk.CTkToplevel):
                 text="I have read this book",
                 variable=var,
                 onvalue=True,
-                offvalue=False
+                offvalue=False,
+                text_color="#18181A"  # <-- make the label text clearly visible
             )
             chk.pack(anchor="w", padx=10, pady=(0, 8))
 
@@ -172,7 +173,6 @@ class BooksRead(ctk.CTkToplevel):
         :param top_n:
         :return: returns the top n search results from books dataframe
         """
-        # Placeholder code
         df = self.books_df.copy()
 
         mask = (
@@ -217,5 +217,3 @@ class BooksRead(ctk.CTkToplevel):
             update_books_read(username, books_read)
 
         messagebox.showinfo("Books saved", f"Saved {added} books as read.")
-
-

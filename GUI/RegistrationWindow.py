@@ -1,8 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
-
 from users_handler_functions import *
-from main_page import MainPage
+from palette import COLORS, FONTS
 
 
 class RegistrationWindow(ctk.CTkToplevel):
@@ -12,6 +11,7 @@ class RegistrationWindow(ctk.CTkToplevel):
         self.title("Create Account")
         self.geometry("500x450")
         self.grab_set()
+        self.configure(fg_color=COLORS["bg_root"])
 
         self.username_var = ctk.StringVar()
         self.password_var = ctk.StringVar()
@@ -22,41 +22,114 @@ class RegistrationWindow(ctk.CTkToplevel):
         title = ctk.CTkLabel(
             self,
             text="Create your Readwise account",
-            font=ctk.CTkFont(size=18, weight="bold")
+            font=ctk.CTkFont(**FONTS["section"]),
+            text_color=COLORS["text_light"],
         )
         title.pack(pady=(20, 10))
 
-        form = ctk.CTkFrame(self, fg_color="transparent")
+        form = ctk.CTkFrame(self, fg_color=COLORS["panel"])
         form.pack(pady=10, padx=40, fill="x")
 
         # First name
-        ctk.CTkLabel(form, text="First name:").pack(anchor="w")
-        ctk.CTkEntry(form, textvariable=self.first_name_var).pack(pady=(0, 10), fill="x")
+        ctk.CTkLabel(
+            form,
+            text="First name:",
+            text_color=COLORS["text_main"],
+            font=ctk.CTkFont(**FONTS["body"]),
+        ).pack(anchor="w", pady=(10, 0))
+        ctk.CTkEntry(
+            form,
+            textvariable=self.first_name_var,
+            fg_color=COLORS["entry_bg"],
+            border_color=COLORS["entry_border"],
+            text_color=COLORS["text_light"],
+        ).pack(pady=(0, 10), fill="x")
 
         # Last name
-        ctk.CTkLabel(form, text="Last name:").pack(anchor="w")
-        ctk.CTkEntry(form, textvariable=self.last_name_var).pack(pady=(0, 10), fill="x")
+        ctk.CTkLabel(
+            form,
+            text="Last name:",
+            text_color=COLORS["text_main"],
+            font=ctk.CTkFont(**FONTS["body"]),
+        ).pack(anchor="w")
+        ctk.CTkEntry(
+            form,
+            textvariable=self.last_name_var,
+            fg_color=COLORS["entry_bg"],
+            border_color=COLORS["entry_border"],
+            text_color=COLORS["text_light"],
+        ).pack(pady=(0, 10), fill="x")
 
         # Username
-        ctk.CTkLabel(form, text="Username:").pack(anchor="w")
-        ctk.CTkEntry(form, textvariable=self.username_var).pack(pady=(0, 10), fill="x")
+        ctk.CTkLabel(
+            form,
+            text="Username:",
+            text_color=COLORS["text_main"],
+            font=ctk.CTkFont(**FONTS["body"]),
+        ).pack(anchor="w")
+        ctk.CTkEntry(
+            form,
+            textvariable=self.username_var,
+            fg_color=COLORS["entry_bg"],
+            border_color=COLORS["entry_border"],
+            text_color=COLORS["text_light"],
+        ).pack(pady=(0, 10), fill="x")
 
         # Password
-        ctk.CTkLabel(form, text="Password:").pack(anchor="w")
-        ctk.CTkEntry(form, textvariable=self.password_var, show="*").pack(pady=(0, 10), fill="x")
+        ctk.CTkLabel(
+            form,
+            text="Password:",
+            text_color=COLORS["text_main"],
+            font=ctk.CTkFont(**FONTS["body"]),
+        ).pack(anchor="w")
+        ctk.CTkEntry(
+            form,
+            textvariable=self.password_var,
+            show="*",
+            fg_color=COLORS["entry_bg"],
+            border_color=COLORS["entry_border"],
+            text_color=COLORS["text_light"],
+        ).pack(pady=(0, 10), fill="x")
 
         # Birthdate
-        ctk.CTkLabel(form, text="Birthdate (MM-DD-YYYY):").pack(anchor="w")
-        ctk.CTkEntry(form, textvariable=self.birthdate_var).pack(pady=(0, 10), fill="x")
+        ctk.CTkLabel(
+            form,
+            text="Birthdate (MM-DD-YYYY):",
+            text_color=COLORS["text_main"],
+            font=ctk.CTkFont(**FONTS["body"]),
+        ).pack(anchor="w")
+        ctk.CTkEntry(
+            form,
+            textvariable=self.birthdate_var,
+            fg_color=COLORS["entry_bg"],
+            border_color=COLORS["entry_border"],
+            text_color=COLORS["text_light"],
+        ).pack(pady=(0, 10), fill="x")
 
         # Buttons
         btn_frame = ctk.CTkFrame(self, fg_color="transparent")
         btn_frame.pack(pady=15)
 
-        create_btn = ctk.CTkButton(btn_frame, text="Create account", command=self.create_account)
+        create_btn = ctk.CTkButton(
+            btn_frame,
+            text="Create account",
+            command=self.create_account,
+            fg_color=COLORS["primary_btn"],
+            hover_color=COLORS["primary_hover"],
+            text_color=COLORS["text_light"],
+            font=ctk.CTkFont(**FONTS["button"]),
+        )
         create_btn.pack(side="left", padx=10)
 
-        cancel_btn = ctk.CTkButton(btn_frame, text="Cancel", fg_color="gray40", command=self.destroy)
+        cancel_btn = ctk.CTkButton(
+            btn_frame,
+            text="Cancel",
+            fg_color=COLORS["secondary_btn"],
+            hover_color=COLORS["secondary_hover"],
+            text_color=COLORS["text_light"],
+            font=ctk.CTkFont(**FONTS["button"]),
+            command=self.destroy,
+        )
         cancel_btn.pack(side="left", padx=10)
 
     def create_account(self):
@@ -90,4 +163,3 @@ class RegistrationWindow(ctk.CTkToplevel):
         add_user(user_data)
         messagebox.showinfo("Success", "Account Created! You can now log in.")
         self.destroy()
-

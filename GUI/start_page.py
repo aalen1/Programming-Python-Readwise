@@ -69,7 +69,7 @@ class StartPage(ctk.CTkFrame):
         username_entry.grid(row=0, column=1, sticky="w")
 
         # Password frame to align the label and the entry
-        pass_row = ctk.CTkFrame(login_form, fg_cotext_mainlof="transparent")
+        pass_row = ctk.CTkFrame(login_form, fg_color="transparent")
         pass_row.pack(fill="x", pady=(0, 10))
         pass_row.grid_columnconfigure(0, weight=0)
         pass_row.grid_columnconfigure(1, weight=1)

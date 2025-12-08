@@ -1,17 +1,23 @@
 import tkinter as tk
 import customtkinter as ctk
-from tkinter import scrolledtext, messagebox, ttk
+from tkinter import messagebox
+from recommender_funcs import recommend
 
 # Main Chat Application
 class ChatApp(ctk.CTkFrame):
-    def __init__(self, master=None):
+    def __init__(self, master=None, books_df=None, clustered_df=None, current_user=None):
         super().__init__(master, fg_color="#1e1e2e")
 
+        # References
+        self.books_df = books_df
+        self.current_user = current_user
+        self.clustered_df = clustered_df
+
         # Fonts and colors to use during the chat
-        self.user_color = "#93c5fd"
-        self.bot_color = "#a5b4fc"
+        self.user_color = "#040E18"
+        self.bot_color = "#000000"
         self.bg_color = "#E2DFDA"
-        self.text_color = "#18181A"
+        self.text_color = "#FFFFFF"
 
         # From the toplevel configure the window
         toplevel = self.winfo_toplevel()
@@ -55,12 +61,22 @@ class ChatApp(ctk.CTkFrame):
             self.main_container,
             font=ctk.CTkFont(size=13),
             fg_color="#D2C49E",
-            text_color=self.text_color,
+            text_color=self.bot_color,
             wrap="word",
             border_width=0
         )
         self.chat_box.pack(padx=15, pady=10, fill="both", expand=True)
-        self.chat_box.insert("end", "Hello! Hello!\n Maybe we could start by telling me what book you just read.\n\n")
+        # Initial message from the bot
+        self.chat_box.insert(
+            "end",
+            "Hello! Hello!\n "
+            "I'm here to help you find the next book to read.\n\n"
+            "Please enter ONE of the following:\n"
+            " - An ISBN-13 (only digits)\n"
+            " - A book title\n"
+            " - An author's name\n\n"
+            "I will try to find a book that matches your request.\n\n"
+        )
         self.chat_box.tag_config("user", foreground=self.user_color)
         self.chat_box.tag_config("bot", foreground=self.bot_color)
         self.chat_box.configure(state="disabled")
@@ -145,9 +161,101 @@ class ChatApp(ctk.CTkFrame):
 
     # [Dummy logic]
     def generate_response(self, user_msg):
-        # Mock keywords
-        keywords = ["harry potter", "hobbit", "mystery","to kill a mockingbird"]
-        if any(k in user_msg.lower() for k in keywords):
-            return "May you would like:\n• The Hobbit\n• Lord of the Rings\n• Percy Jackson"
-        else:
-            return "Sorry, I don't know that one. Try mentioning a title or an author!"
+
+        # Base case when the books df does not exist.
+        if self.books_df is None:
+            return "Sorry, I'm not able to provide recommendations now."
+
+        # Store the books in a variable
+        books = self.books_df.copy()
+        clustered = self.clustered_df.copy()
+
+        # Ensure isbn13 is a string
+        if "isbn13" in books.columns:
+            books["isbn13"] = books["isbn13"].astype(str)
+        if "isbn13" in clustered.columns:
+            clustered["isbn13"] = clustered["isbn13"].astype(str)
+
+        # Validate the input from the user:
+        if not any(ch.isalnum() for ch in user_msg):
+            return(
+                "I couldn't understand your request.\n\n"
+                "Please enter ONE of the following:"
+                " - An ISBN-13 (only digits)\n"
+                " - A book title\n"
+                " - An author's name\n\n"
+            )
+
+        # ISBN detection
+        isbn = None
+        isbn_candidate = "".join(charac for charac in user_msg if charac.isdigit())
+
+        # Check the length of the candidate
+        if len(isbn_candidate) == 13:
+            # Check that this isbn exists in BOTH the book df and the clustered df
+            if (books["isbn13"] == isbn_candidate).any() and (clustered["isbn13"] == isbn_candidate).any():
+                isbn = isbn_candidate
+
+        # If no ISBN is found, we search for book titles and authors
+        if isbn is None:
+            # Mask for the search of title or author
+            mask = (
+                    books["title"].str.contains(user_msg, case=False, na=False) |
+                    books["author(s)"].str.contains(user_msg, case=False, na=False)
+            )
+            # Get the books that match the mask
+            matches = books[mask]
+
+            # If the matches are empty
+            if matches.empty:
+                return (
+                    "I couldn't find any book matching your request.\n\n"
+                    "Please enter ONE of the following:"
+                    " - An ISBN-13 (only digits)\n"
+                    " - A book title\n"
+                    " - An author's name\n\n"
+                )
+            isbn = None
+            for _, row in matches.iterrows():
+                isbn_candidate = str(row["isbn13"])
+                if (clustered["isbn13"] == isbn_candidate).any():
+                    isbn = isbn_candidate
+                    break
+
+        # Get the recommendations
+        rec_idx = recommend(isbn,clustered, n=3)
+
+        # If the recommendations are empty
+        if not rec_idx:
+            return "Sorry, I couldn't find similar books for the input provided."
+
+        # Format recommendations
+        # Get the book title
+        book_title = books.loc[books["isbn13"] == str(isbn)]["title"].iloc[0]
+        # Capitalize
+        book_title = book_title.capitalize()
+
+        msg = [f"Here are the books recommended for {book_title.title()}:"]
+
+        for idx in rec_idx:
+            cluster_row = clustered.iloc[idx]
+            rec_isbn = str(cluster_row["isbn13"])
+
+            # Find this ISBN in the books df
+            book_rows = books[books["isbn13"] == rec_isbn]
+            if book_rows.empty:
+                continue
+            book = book_rows.iloc[0]
+            title = str(book.get("title", "<No Title>"))
+            author = str(book.get("author(s)", "<No Author>"))
+            msg.append(f"- {title.title()} by {author.title()}")
+
+        helper_txt = (
+            "\n\nAsk for another recommendation! Please enter ONE of the following:\n"
+            " - An ISBN-13 (only digits)\n"
+            " - A book title\n"
+            " - An author's name\n\n"
+        )
+
+        return "\n".join(msg) + helper_txt
+

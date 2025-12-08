@@ -26,6 +26,12 @@ class MainPage(ctk.CTkFrame):
         self.master.configure(fg_color="#3B6255")
         # Data of the books
         self.books_df = pd.read_csv("../data/final_df.csv")
+        # Clustered books
+        self.clustered_df = pd.read_csv("../data/clustered_df.csv")
+
+        # Normalize isbn13 column
+        self.books_df["isbn13"] = self.books_df["isbn13"].astype(str)
+        self.clustered_df["isbn13"] = self.clustered_df["isbn13"].astype(str)
 
         # Sidebar Customization
         self.sidebar = ctk.CTkFrame(self, fg_color="#D2C49E", width=120)
@@ -207,24 +213,32 @@ class MainPage(ctk.CTkFrame):
     def open_chat(self):
         """
         Helper Function to open the chat window
-        :return: None
         """
         # New Toplevel window
         chat_window = ctk.CTkToplevel(self)
         chat_window.title("Readwise Chat")
         chat_window.geometry("1000x650")
+        chat_window.configure(fg_color="#CBDED3")
+
         # ChatApp frame inside this new Toplevel window
-        chat_app = ChatApp(master=chat_window)
+        chat_app = ChatApp(
+            master=chat_window,
+            books_df=self.books_df,
+            clustered_df=self.clustered_df,
+            current_user=self.current_user
+        )
         chat_app.pack(fill="both", expand=True)
 
     def open_rating(self):
         """
         Helper Function to open the top 500 window
-        :return: None
         """
         RatingWindow(self, self.books_df)
 
     def open_account(self):
+        """
+        Helper function to open the Account Window
+        """
         if not self.current_user:
             messagebox.showwarning("No user logged in", "Please login to access your account information.")
             return
@@ -234,7 +248,6 @@ class MainPage(ctk.CTkFrame):
     def open_info(self):
         """
         Helper function to open the Info Window
-        :return:
         """
         InfoWindow(self)
 

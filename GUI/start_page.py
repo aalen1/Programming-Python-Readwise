@@ -6,17 +6,14 @@ from main_page import MainPage
 from RegistrationWindow import RegistrationWindow
 
 
-class StartPage(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-
-        # Set appearance
-        ctk.set_appearance_mode("dark")
-        ctk.set_default_color_theme("dark-blue")
+class StartPage(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
 
         # Title
-        self.title("Readwise - Login Page")
-        self.geometry("600x500")
+        self.master = master
+        self.master.title("Readwise - Login Page")
+        self.master.geometry("600x500")
 
         # Title Label
         title = ctk.CTkLabel(
@@ -87,9 +84,10 @@ class StartPage(ctk.CTk):
             return
 
         # Successful login, then we destroy this window and open the MainPage
-        self.destroy()
-        app = MainPage(current_user=user)
-        app.mainloop()
+        self.pack_forget()
+
+        main_page = MainPage(self.master,current_user=user)
+        main_page.pack(expand=True, fill="both")
 
     def open_registration(self):
         RegistrationWindow(self)

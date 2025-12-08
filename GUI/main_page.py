@@ -5,33 +5,35 @@ import random
 from Chat import ChatApp
 from Rating import RatingWindow
 from Info import InfoWindow
-from Recommendation import RecommendationWindow
+from BooksRead import BooksRead
 from AccountWindow import AccountWindow
 import pandas as pd
 
 # Main Page with Sidebar + Buttons
-class MainPage(tk.Tk):
-    def __init__(self, current_user=None):
+class MainPage(ctk.CTkFrame):
+    def __init__(self,master, current_user=None):
         # Custom Tkinter Theme
-        super().__init__()
+        super().__init__(master)
+        # Same window as the start page
+        self.master = master
         # Current user logged in
         self.current_user = current_user
         # ----------- Main window setup
         # Window title and size
-        self.title("Readwise your Personal Book Recommendation Assistant")
-        self.geometry("1200x600")
+        self.master.title("Readwise your Personal Book Recommendation Assistant")
+        self.master.geometry("1200x600")
         # General background color
-        self.configure(bg="#3B6255")
+        self.master.configure(fg_color="#3B6255")
         # Data of the books
         self.books_df = pd.read_csv("../data/final_df.csv")
 
         # Sidebar Customization
-        self.sidebar = tk.Frame(self, bg="#D2C49E", width=120)
+        self.sidebar = ctk.CTkFrame(self, fg_color="#D2C49E", width=120)
         self.sidebar.pack(side="left", fill="y")
         self.sidebar.pack_propagate(False)
 
         # Main Area
-        self.main_frame = tk.Frame(self, bg="#CBDED3")
+        self.main_frame = ctk.CTkFrame(self, fg_color="#CBDED3")
         self.main_frame.pack(side="left", fill="both", expand=True)
 
         # Randomize the welcome message
@@ -51,7 +53,7 @@ class MainPage(tk.Tk):
         title_label.pack(pady=60)
 
         # ----------- Search bar container
-        self.search_frame = ctk.CTkFrame(self.main_frame, corner_radius=20, fg_color = "transparent")
+        self.search_frame = ctk.CTkFrame(self.main_frame, fg_color = "transparent")
         self.search_frame.pack(pady=(0,30))
 
 
@@ -62,7 +64,6 @@ class MainPage(tk.Tk):
         self.search_entry_bar = ctk.CTkEntry(
             master = self.search_frame,
             width = 800,
-            corner_radius = 20,
             border_width = 3,
             border_color = "#8e8e8e",
             height = height_search_bar,
@@ -87,7 +88,7 @@ class MainPage(tk.Tk):
 
         # ------------ Buttons Canvas Area
         # Button Canvas Area
-        self.button_canvas = ctk.CTkFrame(self.main_frame, corner_radius=20, fg_color = "#CBDED3")
+        self.button_canvas = ctk.CTkFrame(self.main_frame, fg_color = "#CBDED3")
         self.button_canvas.pack(expand=True, pady=10)
 
         # 3 main section buttons
@@ -120,7 +121,6 @@ class MainPage(tk.Tk):
                 text=name,
                 width=200,
                 height=80,
-                corner_radius=15,
                 font=ctk.CTkFont(size=18, weight="bold"),
                 fg_color="#1F1F33",
                 hover_color="#2A2A44",
@@ -133,7 +133,7 @@ class MainPage(tk.Tk):
         self.button_canvas.pack(pady=10)
 
         # ------------ (Close button)
-        self.close_canvas = ctk.CTkFrame(self.main_frame, corner_radius=20, fg_color="transparent")
+        self.close_canvas = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.close_canvas.pack(expand=True, pady=10)
 
         # Readwise Info
@@ -142,7 +142,6 @@ class MainPage(tk.Tk):
             text = "Readwise Info",
             width = 120,
             height = 35,
-            corner_radius = 8,
             fg_color="#3b3b40",
             hover_color="#4b4b52",
             command=self.open_info
@@ -154,7 +153,6 @@ class MainPage(tk.Tk):
             text="Close",
             width = 120,
             height = 35,
-            corner_radius = 8,
             fg_color="#8B1E3F",
             hover_color="#A22A50",
             command=self.close_window
@@ -166,9 +164,9 @@ class MainPage(tk.Tk):
     def close_window(self):
         """
         Close main window helper function
-        :return: None
         """
-        self.destroy()
+        root = self.winfo_toplevel()
+        root.destroy()
 
     # Event to define when the user clicks the search button or presses enter in the search box
     def on_button_search_clicked(self):
@@ -201,7 +199,7 @@ class MainPage(tk.Tk):
             return
 
         # Open recommendation window with the information from the search box
-        RecommendationWindow(self, query, self.books_df)
+        BooksRead(self, query, self.books_df, self.current_user)
 
         print(f"Search requested for {query}")
 
@@ -212,11 +210,9 @@ class MainPage(tk.Tk):
         :return: None
         """
         # New Toplevel window
-        chat_window = tk.Toplevel(self)
+        chat_window = ctk.CTkToplevel(self)
         chat_window.title("Readwise Chat")
         chat_window.geometry("1000x650")
-        chat_window.configure(bg="#3B6255")
-
         # ChatApp frame inside this new Toplevel window
         chat_app = ChatApp(master=chat_window)
         chat_app.pack(fill="both", expand=True)
